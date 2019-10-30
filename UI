@@ -68,7 +68,7 @@ def game(root,mytoken):#游戏界面
         c=AI.AI_split_cards(b)
 
     Button(r1, text='发牌', font=('楷体', 20), command=lambda :getpoker(mytoken)).place(x=270, y=500, width=100, height=40)
-    Button(r1, text='出牌', font=('楷体', 20), command=lambda :postpoker(mytoken,a,b)).place(x=500, y=500, width=100, height=40)
+    Button(r1, text='出牌', font=('楷体', 20), command=back).place(x=500, y=500, width=100, height=40)
     Button(r1, text='返回大厅', font=('楷体', 20), command=back).place(x=700, y=30, width=150, height=40)
     mainloop()
 
@@ -129,8 +129,8 @@ def start(mytoken):
     canvas.place(x=0, y=0)
 
     Button(r, text='开始游戏', font=('楷体', 20), command=lambda:game(r,mytoken)).place(x=350, y=180, width=200, height=50)
-    Button(r, text='历史战绩', font=('楷体', 20), command=lambda:score(r,mytoken)).place(x=350, y=270, width=200, height=50)
-    Button(r, text='排行榜', font=('楷体', 20), command=lambda:rankinglist(r,mytoken)).place(x=350, y=360, width=200, height=50)
+    Button(r, text='历史战绩', font=('楷体', 20), command=quit).place(x=350, y=270, width=200, height=50)
+    Button(r, text='排行榜', font=('楷体', 20), command=quit).place(x=350, y=360, width=200, height=50)
     Button(r, text='退出', font=('楷体', 20), command=quit).place(x=770, y=30, width=80, height=40)
 
     mainloop()
