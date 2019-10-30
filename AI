@@ -1,0 +1,264 @@
+import sys
+import itertools
+import requests
+import re
+import time
+
+class inside:
+    flower = 0
+    num = 0
+
+    def __init__(self, f, n):
+        self.flower = f
+        self.num = n
+
+
+'''def outcard(a):
+    return a.num
+
+url = "http://api.revth.com/auth/login"
+headers = {
+        'content-type': 'application/json'
+    }
+form_data={
+    "username": username,
+    "password": password
+}
+dataa=str(data)
+response = requests.request("POST", url, data=dataa, headers=headers)
+print(respond.text)
+p = re.compile(r'token":"(.+?)"')
+token = p.findall(respond)[0]
+print(token)
+'''
+one, two, three = [], [], []  # 扑克牌分堆
+ans_1, ans_2, ans_3 = [], [], []  # 暂时寄存排列答案
+comp_1, comp_2, comp_3 = [], [], []  # 存放完整排列答案
+fin_1, fin_2, fin_3 = [], [], []  # 最终答案
+f1, f2, f3 = [], [], []  # 标记
+compp1, compp2, compp3, compp_z = [], [], [], []
+card = []
+
+for i in range(0, 20):
+    one.append(inside(0, 0))
+    two.append(inside(0, 0))
+    three.append(inside(0, 0))
+    ans_1.append(inside(0, 0))
+    ans_2.append(inside(0, 0))
+    ans_3.append(inside(0, 0))
+    comp_1.append(inside(0, 0))
+    comp_2.append(inside(0, 0))
+    comp_3.append(inside(0, 0))
+    fin_1.append(inside(0, 0))
+    fin_2.append(inside(0, 0))
+    fin_3.append(inside(0, 0))
+    f1.append(0)
+    f2.append(0)
+    f3.append(0)
+
+for i in range(0, 3):
+    compp1.append(inside(0, 0))
+for i in range(0, 5):
+    compp2.append(inside(0, 0))
+for i in range(0, 5):
+    compp3.append(inside(0, 0))
+for i in range(0, 14):
+    compp_z.append(inside(0, 0))
+
+global b1, b2, b3
+global take, en, en2
+flag_1 = 0
+flag_2 = 0
+flag_3 = 0
+
+
+def findnum(x):
+    return x.num
+
+
+hua, number = {}, {}
+for i in range(0, 16):
+    hua[i] = 0
+    number[i] = 0  # 桶排初始化
+
+
+def qian():  # 前墩
+    for j in range(0, 16):
+        hua[j] = 0
+        number[j] = 0
+
+    for i in range(0, 3):
+        compp1[i] = ans_3[i + 1]
+    compp1.sort(key=findnum)  # 前墩牌组有序化
+
+    for i in range(1, 4):
+        ans_3[i] = compp1[i - 1]
+
+
+def zhong():
+    for i in range(0, 16):
+        hua[i] = 0
+        number[i] = 0
+
+    for i in range(0, 5):
+        compp2[i] = ans_2[i + 1]
+
+    compp2.sort(key=findnum)  # 中墩牌组有序化
+    for i in range(1, 6):
+        ans_2[i] = compp2[i - 1]
+
+
+def hou():
+    for i in range(0, 16):
+        hua[i] = 0
+        number[i] = 0
+
+    for i in range(0, 5):
+        compp3[i] = ans_1[i + 1]
+
+    compp3.sort(key=findnum)  # 后墩牌组有序化
+    for i in range(1, 6):
+        ans_1[i] = compp3[i - 1]
+
+
+# def zhizunqinlong():
+
+
+def charge():
+    global b1, b2, b3
+    for i in range(1, 4):  # 前墩
+        ans_3[i] = comp_3[i]
+    for i in range(1, 6):  # 中墩
+        ans_2[i] = comp_2[i]
+    for i in range(1, 6):  # 后墩
+        ans_1[i] = comp_1[i]
+    qian()
+    zhong()
+    hou()
+    # zhizunqinlong()
+    for i in range(1, 4):  # 前墩
+        fin_3[i] = ans_3[i]
+    for i in range(1, 6):  # 中墩
+        fin_2[i] = ans_2[i]
+    for i in range(1, 6):  # 后墩
+        fin_1[i] = ans_1[i]
+
+
+def ser(d, index_1):  # / * 枚举组合 * /
+    global comp_3
+    global comp_2
+    global comp_1
+    for i in range(1, 14):
+        compp_z[i] = one[i]
+    compp_z.sort(key=findnum)
+
+    for i in range(1, 14):
+        one[i] = compp_z[i]
+    for i in range(1, 4):
+        comp_3[i] = one[i]
+
+    for i in range(1, 11):
+        one[i] = one[i + 3]
+
+    for i in range(1, 6):
+        comp_2[i] = one[i]
+
+    for i in range(1, 6):
+        one[i] = one[i + 5]
+
+    for i in range(1, 6):
+        comp_1[i] = one[i]
+    charge()
+
+
+def number_to_hua(x):
+    if x == 1:
+        return "&"
+    if x == 2:
+        return "$"
+    if x == 3:
+        return "#"
+    if x == 4:
+        return "*"
+
+
+def hua_to_number(x):
+    if x == "&":
+        return 1
+    if x == "$":
+        return 2
+    if x == "#":
+        return 3
+    if x == "*":
+        return 4
+
+
+def change(x):
+    if x == 11:
+        return "J"
+    if x == 12:
+        return "Q"
+    if x == 13:
+        return "K"
+    if x == 14:
+        return "A"
+    return str(x)
+
+
+def begingame(str0):  # 读入
+    frc = 0
+    str1 = str0.replace("10", "M")
+    for i in range(0, 39, 3):
+        if str1[i + 1] == "M":
+            x = inside(hua_to_number(str1[i]), 10)
+        else:
+            if str1[i + 1] == "J":
+                x = inside(hua_to_number(str1[i]), 11)
+            else:
+                if str1[i + 1] == "Q":
+                    x = inside(hua_to_number(str1[i]), 12)
+                else:
+                    if str1[i + 1] == "K":
+                        x = inside(hua_to_number(str1[i]), 13)
+                    else:
+                        if str1[i + 1] == "A":
+                            x = inside(hua_to_number(str1[i]), 14)
+                        else:
+                            x = inside(hua_to_number(str1[i]), int(str1[i + 1]))
+        frc += 1
+        one[frc] = x
+
+
+def p_ans():  # 输出
+    sub_ans = []
+    s = ""
+    for i in range(1, 4):  # 前墩
+        if i != 3:
+            s += number_to_hua(fin_3[i].flower) + change(fin_3[i].num) + " "
+        else:
+            s += number_to_hua(fin_3[i].flower) + change(fin_3[i].num)
+
+    sub_ans.append(s)
+    s = ""
+    for i in range(1, 6):  # 中墩
+        if i != 5:
+            s += number_to_hua(fin_2[i].flower) + change(fin_2[i].num) + " "
+        else:
+            s += number_to_hua(fin_2[i].flower) + change(fin_2[i].num)
+    sub_ans.append(s)
+    s = ""
+    for i in range(1, 6):
+        if i != 5:
+            s += number_to_hua(fin_1[i].flower) + change(fin_1[i].num) + " "
+        else:
+            s += number_to_hua(fin_1[i].flower) + change(fin_1[i].num)
+    sub_ans.append(s)
+    return sub_ans
+
+
+# 主函数
+def AI_split_cards(card):
+    begingame(card)  # 开启牌局，读入
+    ser(1, 1)  # 解决问题，深搜
+    sub_ans = p_ans()
+    return sub_ans
