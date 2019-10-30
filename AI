@@ -2,7 +2,8 @@ import sys
 import itertools
 import requests
 import re
-import time
+import json
+import http
 
 class inside:
     flower=0 
@@ -11,12 +12,11 @@ class inside:
         self.flower=f
         self.num=n
 
-
-one,two,three=[],[],[]    # 扑克牌分堆
-ans_1,ans_2,ans_3=[],[],[]  #暂时寄存排列答案
-comp_1,comp_2,comp_3=[],[],[]   #存放完整排列答案
-fin_1,fin_2,fin_3=[],[],[]   #最终答案
-f1,f2,f3=[],[],[]   #标记
+one,two,three=[],[],[]    
+ans_1,ans_2,ans_3=[],[],[]  
+comp_1,comp_2,comp_3=[],[],[]   
+fin_1,fin_2,fin_3=[],[],[]  
+f1,f2,f3=[],[],[]   
 compp1,compp2,compp3,compp_z=[],[],[],[]
 card=[]
 
@@ -47,7 +47,7 @@ for i in range(0,5):
 for i in range(0,14):
     compp_z.append(inside(0,0))
 
-global ant,c1,c2,c3,end_gra,mark # 计数器
+global ant,c1,c2,c3,end_gra,mark 
 ant,c1,c2,c3=0,5,5,3
 end_gra ,mark= 0.0,0.0
 global g1, g2, g3
@@ -64,11 +64,11 @@ def findnum(x):
 hua,number={},{}
 for i in range(0,16):
     hua[i]=0
-    number[i]=0#桶排初始化
+    number[i]=0
 
 
 
-def qian():#前墩
+def qian():
     global gra
     for j in range(0, 16):
         hua[j] = 0
@@ -77,7 +77,7 @@ def qian():#前墩
 
     for i in range(0,3):
         compp1[i]=ans_3[i+1]
-    compp1.sort(key=findnum) #  前墩牌组有序化
+    compp1.sort(key=findnum) 
 
     for i in range(1,4):
         ans_3[i]=compp1[i-1]
@@ -97,13 +97,13 @@ def qian():#前墩
             if flag_1 == 1:
                 k=(9.0+0.9 / 11.0 * (ans_3[1].num - 1))
                 gra += k
-                return k # 3张同花顺
+                return k 
     k=1
     for i in range(1,5):
         if hua[i] == 3:
             k=(6.0 +0.9/(1300+130+13)*((ans_3[3].num-1)*100+(ans_3[2].num-1)*10+(ans_3[1].num-1))*1.0 )
             gra += k
-            return k #3张同花
+            return k 
     k=1
     for i in range(ans_3[1].num,ans_3[1].num+3):
         if number[i] < 1:
@@ -113,13 +113,13 @@ def qian():#前墩
     if flag_2 == 1:
         k=(5.0  + 0.9/11.0*(ans_3[1].num-1)*1.0)
         gra += k
-        return k #3张顺子
+        return k 
     k=1
     for i in range(3,0,-1):
         if number[ans_3[i].num] == 3:
             k=(4.0+0.9/13.0*(ans_3[1].num - 1)*1.0)
             gra += k
-            return k#三条
+            return k
     k=1
     for i in range(3,0,-1):
         if number[ans_3[i].num] == 1:
@@ -127,11 +127,11 @@ def qian():#前墩
         if number[ans_3[i].num] == 2:
             k=(1.0 + 0.9/(130+13)*((ans_3[i].num - 1)*10+k-1)*1.0)
             gra += k
-            return k#单对
+            return k
     
     k=0.9 / (1300.0 + 130.0 + 13.0)*((ans_3[3].num - 1) * 100 + (ans_3[2].num - 1) * 10 + (ans_3[1].num - 1))
     gra += k
-    return k #散牌
+    return k 
 
 def zhong():
     global gra
@@ -142,7 +142,7 @@ def zhong():
     for i in range(0, 5):
         compp2[i] = ans_2[i + 1]
 
-    compp2.sort(key=findnum)  # 中墩牌组有序化
+    compp2.sort(key=findnum)  
     for i in range(1, 6):
         ans_2[i] = compp2[i - 1]
 
@@ -161,8 +161,8 @@ def zhong():
                     flag_2=1
             if flag_2 == 1:
                 k= (9.0 + 0.9 / 9 * (ans_2[1].num - 1)) * 1.0
-                gra += k# 14 13 12 11 10
-                return k # 同花顺
+                gra += k
+                return k 
 
     k=1
     for i in range(5,0,-1):
@@ -171,7 +171,7 @@ def zhong():
         if number[ans_2[i].num] == 4:
             k=(8.0+ 0.9/(130+13)*((ans_2[i].num - 1)*10))*1.0
             gra += k
-            return k#炸弹
+            return k
 
     k=1
     for i in range(5,0,-1):
@@ -181,13 +181,13 @@ def zhong():
                 if number[ans_2[j].num] == 2:
                     k=(7.0 + 0.9 / (130 + 13)*((k - 1) * 10 + ans_2[j].num - 1))*1.0
                     gra += k
-                    return k#葫芦
+                    return k
     k=1
     for i in range(1,4+1):
         if hua[i] == 5:
             k=(6.0 + 0.9 / (130000 + 13000 + 1300+130+13)*((ans_2[5].num-1)*10000+(ans_2[4].num - 1)*1000 + (ans_2[3].num - 1) * 100 + (ans_2[2].num - 1) * 10 + (ans_2[1].num - 1)))*1.0
             gra +=k
-            return k#同花
+            return k
     k=1
     for i in range(ans_2[1].num,ans_2[1].num+5):
         if number[i] < 1:
@@ -197,7 +197,7 @@ def zhong():
     if flag_2 == 1 :
         k=(5.0 + 0.9/9*(ans_2[1].num - 1)*1.0)
         gra += k
-        return k#5张顺子
+        return k
 
     k=1
     for i in range(5,0,-1):
@@ -207,7 +207,7 @@ def zhong():
                 if number[ans_2[j].num] == 1:
                     k=(4.0 + 0.9 / (1300+130+13) * ((k-1) * 100))
                     gra += k
-                    return k# 三条
+                    return k
 
     k=1
     for i in range(5,0,-1):
@@ -216,7 +216,7 @@ def zhong():
                 if (ans_2[i].num != ans_2[j].num) and number[ans_2[j].num] == 2 and abs(ans_2[i].num - ans_2[j].num) == 1 :
                     k=(3.0+ 0.9 / 10 * (ans_2[j].num-1-1)) * 1.0
                     gra += k
-                    return k# 连对2对
+                    return k
 
     k=1
     for i in range(5,0,-1):
@@ -225,18 +225,18 @@ def zhong():
                 if (ans_2[i].num != ans_2[j].num) and number[ans_2[j].num] == 2 :
                     k=(2.0 +0.9 / (130+13) * ((ans_2[i].num - 1) * 10+ans_2[j].num-1)) * 1.0
                     gra += k
-                    return k # 普通2对
+                    return k 
 
     k=1
     for i in range(5,0,-1):
         if number[ans_2[i].num] == 1:
             x = ans_2[i].num
         if number[ans_2[i].num] == 2:
-            k=(1.0+0.9/(130+13)*((ans_1[i].num-1)*10+k-1))*1.0
+            k=(1.0+0.9/(130+13)*((ans_2[i].num-1)*10+k-1))*1.0
             gra += k
-            return k #单对+3张散
+            return k 
 
-    k=(0.9 / (130000 + 13000 + 1300 + 130 + 13)*((ans_1[5].num - 1) * 10000 + (ans_1[4].num - 1) * 1000 + (ans_1[3].num - 1) * 100 + (ans_1[2].num - 1) * 10 + ans_1[1].num - 1))*1.0
+    k=(0.9 / (130000 + 13000 + 1300 + 130 + 13)*((ans_2[5].num - 1) * 10000 + (ans_2[4].num - 1) * 1000 + (ans_2[3].num - 1) * 100 + (ans_2[2].num - 1) * 10 + ans_2[1].num - 1))*1.0
     gra +=k
     return k
 
@@ -250,7 +250,7 @@ def hou():
     for i in range(0, 5):
         compp3[i] = ans_1[i + 1]
 
-    compp3.sort(key=findnum)  # 后墩牌组有序化
+    compp3.sort(key=findnum)  
     for i in range(1, 6):
         ans_1[i] = compp3[i - 1]
 
@@ -270,7 +270,7 @@ def hou():
             if flag_3 == 1:
                 k=(9.0 + 0.9 / 9 * (ans_1[1].num - 1)) * 1.0
                 gra += k
-                return k # 同花顺
+                return k 
 
     k=1
     for i in range(5,0,-1):
@@ -279,7 +279,7 @@ def hou():
         if number[ans_1[i].num] == 4:
             k=(8.0+ 0.9/(130+13)*((ans_1[i].num - 1)*10))*1.0
             gra += k
-            return k#炸弹
+            return k
 
     k=1
     for i in range(5,0,-1):
@@ -289,13 +289,13 @@ def hou():
                 if number[ans_1[j].num] == 2:
                     k=(7.0 + 0.9 / (130 + 13)*((k - 1) * 10 + ans_1[j].num - 1))*1.0
                     gra += k
-                    return k#葫芦
+                    return k
     k=1
     for i in range(1,4+1):
         if hua[i] == 5:
             k=(6.0 + 0.9 / (130000 + 13000 + 1300+130+13)*((ans_1[5].num-1)*10000+(ans_1[4].num - 1)*1000 + (ans_1[3].num - 1) * 100 + (ans_1[2].num - 1) * 10 + (ans_1[1].num - 1)))*1.0
             gra +=k
-            return k #同花
+            return k 
 
     k=1
     for i in range(ans_1[1].num,ans_1[1].num+5):
@@ -306,7 +306,7 @@ def hou():
     if flag_3 == 1 :
         k=(5.0 + 0.9/9*(ans_1[1].num - 1)*1.0)
         gra += k
-        return k#5张顺子
+        return k
 
     k=1
     for i in range(5,0,-1):
@@ -316,7 +316,7 @@ def hou():
                 if number[ans_1[j].num] == 1:
                     k=(4.0 + 0.9 / (1300+130+13) * ((k-1) * 100))
                     gra += k
-                    return k# 三条
+                    return k
 
     k=1
     for i in range(5,0,-1):
@@ -325,7 +325,7 @@ def hou():
                 if (ans_1[i].num != ans_1[j].num) and number[ans_1[j].num] == 2 and abs(ans_1[i].num - ans_1[j].num) == 1 :
                     k= (3.0+ 0.9 / 10 * (ans_1[j].num-1-1)) * 1.0
                     gra +=k
-                    return k # 连对2对
+                    return k 
 
     k=1
     for i in range(5,0,-1):
@@ -334,7 +334,7 @@ def hou():
                 if (ans_1[i].num != ans_1[j].num) and number[ans_1[j].num] == 2 :
                     k=(2.0 +0.9 / (130+13) * ((ans_1[i].num - 1) * 10+ans_1[j].num-1)) * 1.0
                     gra += k
-                    return k # 普通2对
+                    return k 
 
     k=1
     for i in range(5,0,-1):
@@ -343,7 +343,7 @@ def hou():
         if number[ans_1[i].num] == 2:
             k=(1.0+0.9/(130+13)*((ans_1[i].num-1)*10+k-1))*1.0
             gra += k
-            return k #单对+3张散
+            return k 
 
     k=(0.9 / (130000 + 13000 + 1300 + 130 + 13)*((ans_1[5].num - 1) * 10000 + (ans_1[4].num - 1) * 1000 + (ans_1[3].num - 1) * 100 + (ans_1[2].num - 1) * 10 + ans_1[1].num - 1))*1.0
     gra += k
@@ -354,11 +354,11 @@ def charge() :
     global gra,end_gra,ant
     global g1, g2, g3
     global b1, b2, b3
-    for i in range(1,4): #前墩
+    for i in range(1,4): 
         ans_3[i] = comp_3[i]
-    for i in range(1,6): #中墩
+    for i in range(1,6): 
         ans_2[i] = comp_2[i]
-    for i in range(1,6): #后墩
+    for i in range(1,6): 
         ans_1[i] = comp_1[i]
     gra = 0.0
     j1 = qian()
@@ -372,11 +372,11 @@ def charge() :
     if gra>end_gra :
         end_ans = gra
         a1 = g1; a2 = g2; a3 = g3
-        for i in range(1,4):# 前墩
+        for i in range(1,4):
             fin_3[i] = ans_3[i]
-        for i in range(1,6):#中墩
+        for i in range(1,6):
             fin_2[i] = ans_2[i]
-        for i in range(1,6): #后墩
+        for i in range(1,6): 
             fin_1[i] = ans_1[i]
     ant+=1
 
@@ -388,7 +388,7 @@ def ser2(d,index_2) :
         f2[i] = 1
         if index_2 == c2 :
             index_3 = 0
-            for j in range(1,8+1):
+            for j in range(1,9):
                 if f2[j] == 0 :
                     index_3+=1
                     comp_3[index_3] = two[j]
@@ -398,8 +398,8 @@ def ser2(d,index_2) :
         f2[i] = 0
 
 
-def ser1(d, index_1): #/ * 枚举组合 * /
-    for i in range(d,13+1):
+def ser1(d, index_1): 
+    for i in range(d,14):
         f1[i] = 1
         comp_1[index_1] = one[i]
         if index_1 == c1 :
@@ -450,7 +450,7 @@ def change(x):
         return "A"
     return str(x)
 
-def begingame(str0):#读入
+def begingame(str0):
     frc = 0
     str1 = str0.replace("10", "M")
     for i in range(0,39,3):
@@ -473,10 +473,10 @@ def begingame(str0):#读入
         frc+=1
         one[frc]=x
         
-def p_ans():#输出
+def p_ans():
     sub_ans=[]
     s=""
-    for i in range(1, 4):  # 前墩
+    for i in range(1, 4):  
         if i!=3:
             s+=number_to_hua(fin_3[i].flower)+change(fin_3[i].num)+" "
         else:
@@ -484,7 +484,7 @@ def p_ans():#输出
 
     sub_ans.append(s)
     s=""
-    for i in range(1, 6):  # 中墩
+    for i in range(1, 6):  
         if i != 5:
             s += number_to_hua(fin_2[i].flower) + change(fin_2[i].num) + " "
         else:
@@ -500,11 +500,11 @@ def p_ans():#输出
     print(sub_ans)
     return sub_ans
 
-
-#主函数
 def AI_split_cards(card):
-    begingame(card)#开启牌局，读入
-    ser1(1, 1)#解决问题，深搜
+    begingame(card)
+    ser1(1, 1)
     sub_ans=p_ans()
     return sub_ans
 
+
+    
