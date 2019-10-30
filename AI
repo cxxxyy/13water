@@ -11,24 +11,7 @@ class inside:
         self.flower=f
         self.num=n
 
-'''def outcard(a):
-    return a.num
 
-url = "http://api.revth.com/auth/login"
-headers = {
-        'content-type': 'application/json'
-    }
-form_data={
-    "username": username,
-    "password": password
-}
-dataa=str(data)
-response = requests.request("POST", url, data=dataa, headers=headers)
-print(respond.text)
-p = re.compile(r'token":"(.+?)"')
-token = p.findall(respond)[0]
-print(token)
-'''
 one,two,three=[],[],[]    # 扑克牌分堆
 ans_1,ans_2,ans_3=[],[],[]  #暂时寄存排列答案
 comp_1,comp_2,comp_3=[],[],[]   #存放完整排列答案
